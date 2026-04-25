@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduAttend — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #e8e6e0;
+    --text: #1a1a18;
+    --muted: #8a8880;
+    --accent: #2563eb;
+    --accent-light: #eff6ff;
+    --danger: #dc2626;
+    --danger-light: #fef2f2;
+    --success: #16a34a;
+    --success-light: #f0fdf4;
+    --warning: #d97706;
+    --warning-light: #fffbeb;
+    --radius: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px; height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .nav-logo { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; color: var(--accent); }
+  .nav-logo span { color: var(--text); }
+  .nav-links { display: flex; gap: 8px; align-items: center; }
+  .nav-links a {
+    padding: 8px 16px; border-radius: 8px; text-decoration: none;
+    color: var(--muted); font-size: 14px; font-weight: 500; transition: all 0.2s;
+  }
+  .nav-links a:hover { background: var(--bg); color: var(--text); }
+  .nav-links a.active { background: var(--accent-light); color: var(--accent); }
+  #clock {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    color: var(--muted);
+    padding: 6px 14px;
+    background: var(--bg);
+    border-radius: 8px;
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px; }
+
+  /* HEADER */
+  .page-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px;
+  }
+  .page-header h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.5px; }
+  .page-header p { font-size: 14px; color: var(--muted); margin-top: 4px; }
+  .refresh-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px; font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* STATS ROW */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+  }
+  .stat-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; }
+  .stat-value { font-size: 32px; font-weight: 600; letter-spacing: -1px; font-family: 'Space Mono', monospace; }
+  .stat-value.danger { color: var(--danger); }
+  .stat-value.warning { color: var(--warning); }
+  .stat-value.success { color: var(--success); }
+
+  /* URGENT */
+  .urgent-section {
+    background: var(--danger-light);
+    border: 1.5px solid #fecaca;
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .urgent-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+  }
+  .urgent-header h2 { font-size: 15px; font-weight: 600; color: var(--danger); }
+  .urgent-badge {
+    background: var(--danger); color: white;
+    font-size: 11px; font-weight: 700;
+    padding: 2px 8px; border-radius: 100px;
+  }
+  .blink { animation: blink 1.2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* TASK CARDS */
+  .task-grid { display: flex; flex-direction: column; gap: 10px; }
+  .task-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 22px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 16px;
+    transition: box-shadow 0.2s;
+  }
+  .task-item:hover { box-shadow: var(--shadow); }
+  .task-item.urgent { border-color: #fecaca; background: #fff5f5; }
+  .task-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .task-meta { font-size: 12px; color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; }
+  .task-meta span { display: flex; align-items: center; gap: 4px; }
+  .countdown {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    white-space: nowrap;
+    min-width: 140px;
+    text-align: center;
+  }
+  .countdown.danger { background: var(--danger-light); color: var(--danger); }
+  .countdown.warning { background: var(--warning-light); color: var(--warning); }
+  .countdown.expired { background: #f1f5f9; color: var(--muted); }
+
+  /* SECTION */
+  .section-title {
+    font-size: 16px; font-weight: 600;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title .count {
+    background: var(--bg); color: var(--muted);
+    font-size: 12px; padding: 2px 8px; border-radius: 100px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .empty-state .icon { font-size: 36px; margin-bottom: 10px; }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .container { padding: 24px 20px; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .task-item { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Edu<span>Attend</span></div>
+  <div class="nav-links">
+    <a href="index.html">Trang chủ</a>
+    <a href="faceID.html">Điểm danh</a>
+    <a href="dashboard.html" class="active">Dashboard</a>
+    <a href="manage.html">Quản lý</a>
+    <div id="clock">--:--:--</div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-header">
+    <div>
+      <h1>Dashboard nhiệm vụ</h1>
+      <p>Theo dõi deadline và tiến độ công việc theo thời gian thực</p>
+    </div>
+    <button class="refresh-btn" onclick="loadTasks()">
+      <span>🔄</span> Làm mới
+    </button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">Tổng nhiệm vụ</div>
+      <div class="stat-value" id="statTotal">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Sắp hết hạn</div>
+      <div class="stat-value danger" id="statUrgent">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Trong 24h</div>
+      <div class="stat-value warning" id="statToday">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Đã hết hạn</div>
+      <div class="stat-value" id="statExpired">—</div>
+    </div>
+  </div>
+
+  <!-- URGENT -->
+  <div class="urgent-section" id="urgentSection" style="display:none">
+    <div class="urgent-header">
+      <span class="blink">🔴</span>
+      <h2>DEADLINE SẮP TỚI</h2>
+      <span class="urgent-badge" id="urgentCount">0</span>
+    </div>
+    <div class="task-grid" id="urgentList"></div>
+  </div>
+
+  <!-- ALL TASKS -->
+  <div class="section-title">
+    Tất cả nhiệm vụ
+    <span class="count" id="totalCount">0</span>
+  </div>
+  <div class="task-grid" id="taskList">
+    <div class="empty-state">
+      <div class="icon">📋</div>
+      <div>Đang tải dữ liệu...</div>
+    </div>
+  </div>
+</div>
+
+<script src="dashboard.js"></script>
+</body>
+</html>

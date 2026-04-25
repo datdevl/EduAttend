@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduAttend — Điểm Danh Face ID</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!-- face-api.js: chạy hoàn toàn trên browser, không cần backend -->
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #e8e6e0;
+    --text: #1a1a18;
+    --muted: #8a8880;
+    --accent: #2563eb;
+    --accent-light: #eff6ff;
+    --danger: #dc2626;
+    --success: #16a34a;
+    --warning: #d97706;
+    --radius: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .nav-logo { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; color: var(--accent); }
+  .nav-logo span { color: var(--text); }
+  .nav-links { display: flex; gap: 8px; }
+  .nav-links a {
+    padding: 8px 16px; border-radius: 8px; text-decoration: none;
+    color: var(--muted); font-size: 14px; font-weight: 500; transition: all 0.2s;
+  }
+  .nav-links a:hover { background: var(--bg); color: var(--text); }
+  .nav-links a.active { background: var(--accent-light); color: var(--accent); }
+
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  /* LEFT — CAMERA */
+  .camera-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .camera-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .camera-header h2 { font-size: 16px; font-weight: 600; }
+  .status-dot {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+  .dot.live { background: var(--success); animation: pulse 1.5s infinite; }
+  .dot.scanning { background: var(--warning); animation: pulse 0.5s infinite; }
+  .dot.granted { background: var(--success); }
+  .dot.denied { background: var(--danger); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .video-wrap {
+    position: relative;
+    background: #0a0a0a;
+    aspect-ratio: 4/3;
+    overflow: hidden;
+  }
+  #video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: scaleX(-1); /* mirror */
+  }
+  /* overlay canvas for face-api landmarks */
+  #overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    transform: scaleX(-1);
+  }
+
+  /* scanning animation frame */
+  .scan-frame {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 55%; aspect-ratio: 1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .scan-frame.active { opacity: 1; }
+  .scan-frame::before, .scan-frame::after,
+  .scan-frame .corner-br, .scan-frame .corner-tl {
+    content: '';
+    position: absolute;
+    width: 24px; height: 24px;
+    border-color: var(--accent);
+    border-style: solid;
+  }
+  .scan-frame::before { top: 0; left: 0; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+  .scan-frame::after  { top: 0; right: 0; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+  .scan-frame .corner-br { bottom: 0; right: 0; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+  .scan-frame .corner-tl { bottom: 0; left: 0; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+  .scan-line-h {
+    position: absolute;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    animation: scanV 2s ease-in-out infinite;
+    opacity: 0.8;
+  }
+  @keyframes scanV {
+    0% { top: 0; opacity: 1; }
+    100% { top: 100%; opacity: 0.3; }
+  }
+
+  .camera-footer { padding: 16px 24px; }
+
+  /* RIGHT — CONTROL */
+  .control-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+  }
+  .control-card h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+  .control-card > p { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+
+  .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+  input {
+    padding: 11px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--bg);
+    transition: all 0.2s;
+    outline: none;
+  }
+  input:focus { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 13px 24px;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.5; pointer-events: none; }
+  .btn-secondary { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* RESULT */
+  .result-box {
+    margin-top: 20px;
+    border-radius: 12px;
+    padding: 20px;
+    display: none;
+    border: 1.5px solid var(--border);
+  }
+  .result-box.success { border-color: #bbf7d0; background: #f0fdf4; }
+  .result-box.error   { border-color: #fecaca; background: #fef2f2; }
+  .result-icon { font-size: 32px; margin-bottom: 10px; }
+  .result-name { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .result-meta { font-size: 13px; color: var(--muted); line-height: 1.7; }
+  .result-meta strong { color: var(--text); }
+
+  /* LOADING STATE */
+  .loading-model {
+    padding: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 12px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.4s;
+  }
+
+  /* INFO STRIP */
+  .info-strip {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+  .chip {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 100px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* HOW IT WORKS */
+  .how-section {
+    grid-column: 1 / -1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+  }
+  .how-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .step { text-align: center; }
+  .step-num {
+    width: 36px; height: 36px;
+    background: var(--accent-light);
+    color: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    margin: 0 auto 10px;
+  }
+  .step p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  @media (max-width: 700px) {
+    nav { padding: 0 20px; }
+    .page { grid-template-columns: 1fr; padding: 24px 20px; }
+    .steps { grid-template-columns: repeat(2, 1fr); }
+    .how-section { grid-column: 1; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Edu<span>Attend</span></div>
+  <div class="nav-links">
+    <a href="index.html">Trang chủ</a>
+    <a href="faceID.html" class="active">Điểm danh</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="manage.html">Quản lý</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- CAMERA -->
+  <div class="camera-card">
+    <div class="camera-header">
+      <h2>Camera</h2>
+      <div class="status-dot">
+        <div class="dot" id="camDot"></div>
+        <span id="camStatus">Đang khởi động...</span>
+      </div>
+    </div>
+    <div class="video-wrap">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="overlay"></canvas>
+      <div class="scan-frame" id="scanFrame">
+        <div class="corner-br"></div>
+        <div class="corner-tl"></div>
+        <div class="scan-line-h"></div>
+      </div>
+    </div>
+    <div class="camera-footer">
+      <div class="loading-model" id="modelStatus">
+        <div>⏳ Đang tải model AI nhận diện khuôn mặt...</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTROL -->
+  <div class="control-card">
+    <h2>Điểm danh</h2>
+    <p>Nhìn thẳng vào camera, nhập MSV và nhấn Quét.</p>
+
+    <div class="form-group">
+      <label>Mã sinh viên (3 số cuối)</label>
+      <input type="text" id="msvInput" placeholder="Vd: 007" maxlength="10">
+    </div>
+
+    <button class="btn btn-primary" id="scanBtn" onclick="scanFace()" disabled>
+      <span>🎭</span> Quét khuôn mặt
+    </button>
+    <button class="btn btn-secondary" onclick="window.location.href='manage.html'">
+      <span>📋</span> Xem lịch sử điểm danh
+    </button>
+
+    <div class="info-strip">
+      <div class="chip">🤖 AI face-api.js</div>
+      <div class="chip">🔒 Chạy offline</div>
+      <div class="chip">📍 Lấy vị trí GPS</div>
+    </div>
+
+    <div class="result-box" id="resultBox">
+      <div class="result-icon" id="resultIcon"></div>
+      <div class="result-name" id="resultName"></div>
+      <div class="result-meta" id="resultMeta"></div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="how-section">
+    <h3>Quy trình nhận diện</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <p>Model AI tải về, chạy hoàn toàn trên trình duyệt</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <p>Camera phát hiện & phân tích 128 điểm khuôn mặt</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <p>So sánh với ảnh sinh viên trong Google Sheet</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <p>Ghi nhận điểm danh kèm thời gian & vị trí GPS</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<audio id="scanSound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
+
+<script src="face.js"></script>
+</body>
+</html>
