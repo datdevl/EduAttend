@@ -1,359 +1,324 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EduAttend — Điểm Danh Face ID</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<!-- face-api.js: chạy hoàn toàn trên browser, không cần backend -->
 <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <style>
-  :root {
-    --bg: #f5f4f0;
-    --surface: #ffffff;
-    --border: #e8e6e0;
-    --text: #1a1a18;
-    --muted: #8a8880;
-    --accent: #2563eb;
-    --accent-light: #eff6ff;
-    --danger: #dc2626;
-    --success: #16a34a;
-    --warning: #d97706;
-    --radius: 16px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-  }
+/* ===== THEME VARS ===== */
+:root {
+  --bg:           #f5f4f0;
+  --surface:      #ffffff;
+  --surface2:     #f9f8f5;
+  --border:       #e8e6e0;
+  --text:         #1a1a18;
+  --muted:        #8a8880;
+  --accent:       #2563eb;
+  --accent-light: #eff6ff;
+  --accent-hover: #1d4ed8;
+  --danger:       #dc2626;
+  --danger-light: #fef2f2;
+  --success:      #16a34a;
+  --success-light:#f0fdf4;
+  --warning:      #d97706;
+  --warning-light:#fffbeb;
+  --radius:       16px;
+  --shadow:       0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-lg:    0 8px 32px rgba(0,0,0,0.12);
+  --transition:   all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+[data-theme="dark"] {
+  --bg:           #0f1117;
+  --surface:      #1a1d27;
+  --surface2:     #22263a;
+  --border:       #2e3350;
+  --text:         #e8e8f0;
+  --muted:        #6b7090;
+  --accent:       #4f8ef7;
+  --accent-light: #1a2540;
+  --accent-hover: #3b72e8;
+  --danger:       #f87171;
+  --danger-light: #2a1515;
+  --success:      #4ade80;
+  --success-light:#0f2a1a;
+  --warning:      #fbbf24;
+  --warning-light:#2a2010;
+  --shadow:       0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.25);
+  --shadow-lg:    0 8px 32px rgba(0,0,0,0.4);
+}
 
-  nav {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 40px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky; top: 0; z-index: 100;
-  }
-  .nav-logo { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; color: var(--accent); }
-  .nav-logo span { color: var(--text); }
-  .nav-links { display: flex; gap: 8px; }
-  .nav-links a {
-    padding: 8px 16px; border-radius: 8px; text-decoration: none;
-    color: var(--muted); font-size: 14px; font-weight: 500; transition: all 0.2s;
-  }
-  .nav-links a:hover { background: var(--bg); color: var(--text); }
-  .nav-links a.active { background: var(--accent-light); color: var(--accent); }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition:background 0.3s,color 0.3s; }
 
-  .page {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 48px 40px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;
-    align-items: start;
-  }
+/* ===== NAV ===== */
+nav {
+  background:var(--surface); border-bottom:1px solid var(--border);
+  padding:0 40px; height:64px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:100;
+  box-shadow:var(--shadow);
+}
+.nav-logo { font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--accent); text-decoration:none; }
+.nav-logo span { color:var(--text); }
+.nav-links { display:flex; gap:6px; align-items:center; }
+.nav-links a {
+  padding:8px 16px; border-radius:8px; text-decoration:none;
+  color:var(--muted); font-size:14px; font-weight:500; transition:var(--transition);
+}
+.nav-links a:hover { background:var(--surface2); color:var(--text); }
+.nav-links a.active { background:var(--accent-light); color:var(--accent); }
 
-  /* LEFT — CAMERA */
-  .camera-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: var(--shadow);
-  }
-  .camera-header {
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .camera-header h2 { font-size: 16px; font-weight: 600; }
-  .status-dot {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-  }
-  .dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--muted);
-  }
-  .dot.live { background: var(--success); animation: pulse 1.5s infinite; }
-  .dot.scanning { background: var(--warning); animation: pulse 0.5s infinite; }
-  .dot.granted { background: var(--success); }
-  .dot.denied { background: var(--danger); }
+/* Dark mode toggle */
+.theme-toggle {
+  width:40px; height:40px; border-radius:10px;
+  border:1.5px solid var(--border); background:var(--surface2);
+  cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center;
+  transition:var(--transition); color:var(--text);
+}
+.theme-toggle:hover { border-color:var(--accent); }
 
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
-  }
+/* ===== PAGE LAYOUT ===== */
+.page {
+  max-width:1080px; margin:0 auto; padding:40px;
+  display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start;
+}
 
-  .video-wrap {
-    position: relative;
-    background: #0a0a0a;
-    aspect-ratio: 4/3;
-    overflow: hidden;
-  }
-  #video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transform: scaleX(-1); /* mirror */
-  }
-  /* overlay canvas for face-api landmarks */
-  #overlay {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    transform: scaleX(-1);
-  }
+/* ===== CARD ===== */
+.card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); box-shadow:var(--shadow);
+  overflow:hidden; transition:var(--transition);
+}
+.card-header {
+  padding:18px 24px 16px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.card-header h2 { font-size:16px; font-weight:600; }
+.card-body { padding:24px; }
 
-  /* scanning animation frame */
-  .scan-frame {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 55%; aspect-ratio: 1;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  .scan-frame.active { opacity: 1; }
-  .scan-frame::before, .scan-frame::after,
-  .scan-frame .corner-br, .scan-frame .corner-tl {
-    content: '';
-    position: absolute;
-    width: 24px; height: 24px;
-    border-color: var(--accent);
-    border-style: solid;
-  }
-  .scan-frame::before { top: 0; left: 0; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
-  .scan-frame::after  { top: 0; right: 0; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
-  .scan-frame .corner-br { bottom: 0; right: 0; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
-  .scan-frame .corner-tl { bottom: 0; left: 0; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
-  .scan-line-h {
-    position: absolute;
-    width: 100%; height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    animation: scanV 2s ease-in-out infinite;
-    opacity: 0.8;
-  }
-  @keyframes scanV {
-    0% { top: 0; opacity: 1; }
-    100% { top: 100%; opacity: 0.3; }
-  }
+/* ===== CAMERA ===== */
+.video-wrap {
+  position:relative; background:#050810; aspect-ratio:4/3; overflow:hidden;
+}
+#video { width:100%; height:100%; object-fit:cover; display:block; transform:scaleX(-1); }
+#overlay { position:absolute; top:0; left:0; width:100%; height:100%; transform:scaleX(-1); }
 
-  .camera-footer { padding: 16px 24px; }
+/* Scan frame */
+.scan-frame {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:54%; aspect-ratio:1; pointer-events:none;
+  opacity:0; transition:opacity 0.3s;
+}
+.scan-frame.active { opacity:1; }
+.sf-corner {
+  position:absolute; width:22px; height:22px;
+  border-color:var(--accent); border-style:solid;
+}
+.sf-tl { top:0;    left:0;  border-width:3px 0 0 3px; border-radius:5px 0 0 0; }
+.sf-tr { top:0;    right:0; border-width:3px 3px 0 0; border-radius:0 5px 0 0; }
+.sf-br { bottom:0; right:0; border-width:0 3px 3px 0; border-radius:0 0 5px 0; }
+.sf-bl { bottom:0; left:0;  border-width:0 0 3px 3px; border-radius:0 0 0 5px; }
+.sf-line {
+  position:absolute; width:100%; height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  animation:scanH 2.5s ease-in-out infinite;
+}
+@keyframes scanH { 0%{top:0;opacity:1} 100%{top:100%;opacity:0.2} }
 
-  /* RIGHT — CONTROL */
-  .control-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px;
-    box-shadow: var(--shadow);
-  }
-  .control-card h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
-  .control-card > p { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+/* ===== STATUS DOT ===== */
+.status-dot { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--muted); }
+.dot { width:8px; height:8px; border-radius:50%; background:var(--muted); transition:background 0.3s; }
+.dot.live     { background:var(--success); animation:pulseDot 1.8s infinite; }
+.dot.scanning { background:var(--warning); animation:pulseDot 0.6s infinite; }
+.dot.granted  { background:var(--success); }
+.dot.denied   { background:var(--danger); }
+@keyframes pulseDot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(0.7);opacity:0.5} }
 
-  .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-  label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
-  input {
-    padding: 11px 16px;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    color: var(--text);
-    background: var(--bg);
-    transition: all 0.2s;
-    outline: none;
-  }
-  input:focus { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+/* ===== MODEL STATUS ===== */
+.model-footer { padding:14px 20px; border-top:1px solid var(--border); }
+.progress-bar { height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-top:10px; }
+.progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),#7c3aed); border-radius:2px; width:0%; transition:width 0.5s; }
 
-  .btn {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 13px 24px;
-    border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
-    width: 100%;
-    margin-bottom: 10px;
-  }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
-  .btn-primary:disabled { opacity: 0.5; pointer-events: none; }
-  .btn-secondary { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
-  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+/* ===== CONTROL PANEL ===== */
+.form-group { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+label { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+input[type="text"] {
+  padding:12px 16px; border:1.5px solid var(--border); border-radius:10px;
+  font-family:'DM Sans',sans-serif; font-size:15px; color:var(--text);
+  background:var(--surface2); transition:var(--transition); outline:none; width:100%;
+}
+input[type="text"]:focus { border-color:var(--accent); background:var(--surface); box-shadow:0 0 0 3px rgba(37,99,235,0.1); }
 
-  /* RESULT */
-  .result-box {
-    margin-top: 20px;
-    border-radius: 12px;
-    padding: 20px;
-    display: none;
-    border: 1.5px solid var(--border);
-  }
-  .result-box.success { border-color: #bbf7d0; background: #f0fdf4; }
-  .result-box.error   { border-color: #fecaca; background: #fef2f2; }
-  .result-icon { font-size: 32px; margin-bottom: 10px; }
-  .result-name { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
-  .result-meta { font-size: 13px; color: var(--muted); line-height: 1.7; }
-  .result-meta strong { color: var(--text); }
+/* ===== BUTTONS ===== */
+.btn {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  width:100%; padding:13px 20px; border-radius:12px;
+  font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600;
+  cursor:pointer; border:none; transition:var(--transition); margin-bottom:10px;
+}
+.btn-primary {
+  background:linear-gradient(135deg, var(--accent), #7c3aed);
+  color:#fff; box-shadow:0 4px 14px rgba(37,99,235,0.35);
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(37,99,235,0.45); }
+.btn-primary:active { transform:translateY(0); }
+.btn-primary:disabled { opacity:0.6; pointer-events:none; }
 
-  /* LOADING STATE */
-  .loading-model {
-    padding: 20px;
-    text-align: center;
-    font-size: 14px;
-    color: var(--muted);
-  }
-  .progress-bar {
-    height: 4px;
-    background: var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-    margin-top: 12px;
-  }
-  .progress-fill {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 2px;
-    width: 0%;
-    transition: width 0.4s;
-  }
+.btn-secondary {
+  background:var(--surface2); color:var(--text);
+  border:1.5px solid var(--border);
+}
+.btn-secondary:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-light); }
 
-  /* INFO STRIP */
-  .info-strip {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 16px;
-  }
-  .chip {
-    background: var(--accent-light);
-    color: var(--accent);
-    font-size: 12px;
-    font-weight: 600;
-    padding: 5px 12px;
-    border-radius: 100px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
+/* ===== CHIPS ===== */
+.chip-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; margin-bottom:16px; }
+.chip {
+  background:var(--accent-light); color:var(--accent);
+  font-size:11px; font-weight:700; padding:5px 12px; border-radius:100px;
+  display:flex; align-items:center; gap:4px; letter-spacing:0.3px;
+}
 
-  /* HOW IT WORKS */
-  .how-section {
-    grid-column: 1 / -1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px;
-    box-shadow: var(--shadow);
-  }
-  .how-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
-  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-  .step { text-align: center; }
-  .step-num {
-    width: 36px; height: 36px;
-    background: var(--accent-light);
-    color: var(--accent);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 700;
-    margin: 0 auto 10px;
-  }
-  .step p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+/* ===== LIVE STATUS PANEL ===== */
+.live-status-panel {
+  background:var(--surface2); border-radius:12px;
+  border:1px solid var(--border); padding:14px; margin-top:16px;
+}
+.live-status-panel h4 { font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:10px; }
+#liveStatus .ls-row {
+  font-size:13px; padding:5px 0; border-bottom:1px solid var(--border);
+  display:flex; flex-direction:column; gap:3px;
+}
+#liveStatus .ls-row:last-child { border-bottom:none; }
+#liveStatus .ls-row.ok    { color:var(--success); }
+#liveStatus .ls-row.warn  { color:var(--warning); }
+#liveStatus .ls-row.muted { color:var(--muted); }
+#liveStatus .ls-row.ls-title { font-weight:700; font-size:14px; padding-bottom:8px; }
+.ls-bar {
+  height:4px; background:var(--border); border-radius:2px;
+  overflow:hidden; margin-top:3px; width:100%;
+}
+.ls-bar span { display:block; height:100%; border-radius:2px; transition:width 0.3s; }
 
-  @media (max-width: 700px) {
-    nav { padding: 0 20px; }
-    .page { grid-template-columns: 1fr; padding: 24px 20px; }
-    .steps { grid-template-columns: repeat(2, 1fr); }
-    .how-section { grid-column: 1; }
-  }
+/* ===== RESULT BOX ===== */
+.result-box {
+  display:none; border-radius:14px; padding:20px;
+  margin-top:16px; border:1.5px solid var(--border);
+  animation:slideIn 0.3s ease;
+}
+@keyframes slideIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.result-box.success { border-color:#86efac; background:var(--success-light); }
+.result-box.error   { border-color:#fca5a5; background:var(--danger-light);  }
+.result-box.warning { border-color:#fcd34d; background:var(--warning-light); }
+.result-icon { font-size:36px; margin-bottom:10px; }
+.result-name { font-size:17px; font-weight:700; margin-bottom:6px; }
+.result-meta { font-size:13px; color:var(--muted); line-height:1.8; }
+
+/* ===== HOW IT WORKS ===== */
+.how-section { grid-column:1/-1; }
+.steps { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+.step { text-align:center; padding:20px 16px; background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); }
+.step-num {
+  width:36px; height:36px; background:linear-gradient(135deg,var(--accent),#7c3aed);
+  color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:700; margin:0 auto 10px;
+}
+.step p { font-size:13px; color:var(--muted); line-height:1.6; }
+
+/* ===== SPIN ===== */
+@keyframes spin { to{transform:rotate(360deg)} }
+.spin { display:inline-block; animation:spin 0.8s linear infinite; }
+
+@media(max-width:700px){
+  nav { padding:0 20px; }
+  .page { grid-template-columns:1fr; padding:20px; }
+  .steps { grid-template-columns:repeat(2,1fr); }
+  .how-section { grid-column:1; }
+}
 </style>
 </head>
 <body>
 
 <nav>
-  <div class="nav-logo">Edu<span>Attend</span></div>
+  <a href="index.html" class="nav-logo">Edu<span>Attend</span></a>
   <div class="nav-links">
     <a href="index.html">Trang chủ</a>
     <a href="faceID.html" class="active">Điểm danh</a>
     <a href="dashboard.html">Dashboard</a>
     <a href="manage.html">Quản lý</a>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Đổi giao diện">🌙</button>
   </div>
 </nav>
 
 <div class="page">
 
-  <!-- CAMERA -->
-  <div class="camera-card">
-    <div class="camera-header">
-      <h2>Camera</h2>
+  <!-- CAMERA CARD -->
+  <div class="card">
+    <div class="card-header">
+      <h2>📷 Camera</h2>
       <div class="status-dot">
         <div class="dot" id="camDot"></div>
         <span id="camStatus">Đang khởi động...</span>
       </div>
     </div>
+
     <div class="video-wrap">
       <video id="video" autoplay playsinline muted></video>
       <canvas id="overlay"></canvas>
       <div class="scan-frame" id="scanFrame">
-        <div class="corner-br"></div>
-        <div class="corner-tl"></div>
-        <div class="scan-line-h"></div>
+        <div class="sf-corner sf-tl"></div>
+        <div class="sf-corner sf-tr"></div>
+        <div class="sf-corner sf-br"></div>
+        <div class="sf-corner sf-bl"></div>
+        <div class="sf-line"></div>
       </div>
     </div>
-    <div class="camera-footer">
-      <div class="loading-model" id="modelStatus">
+
+    <div class="model-footer">
+      <div id="modelStatus">
         <div>⏳ Đang tải model AI nhận diện khuôn mặt...</div>
         <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
       </div>
     </div>
   </div>
 
-  <!-- CONTROL -->
-  <div class="control-card">
-    <h2>Điểm danh</h2>
-    <p>Nhìn thẳng vào camera, nhập MSV và nhấn Quét.</p>
+  <!-- CONTROL CARD -->
+  <div class="card card-body">
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:6px;">Điểm danh Face ID</h2>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.6;">AI phân tích khuôn mặt, so sánh với CSDL sinh viên và ghi nhận điểm danh tự động.</p>
 
     <div class="form-group">
-      <label>Mã sinh viên (3 số cuối)</label>
-      <input type="text" id="msvInput" placeholder="Vd: 007" maxlength="10">
+      <label>Mã sinh viên (3 số cuối MSV)</label>
+      <input type="text" id="msvInput" placeholder="Ví dụ: 090" maxlength="10"
+        onkeydown="if(event.key==='Enter')scanFace()">
     </div>
 
     <button class="btn btn-primary" id="scanBtn" onclick="scanFace()" disabled>
       <span>🎭</span> Quét khuôn mặt
     </button>
-    <button class="btn btn-secondary" onclick="window.location.href='manage.html'">
+    <button class="btn btn-secondary" onclick="location.href='manage.html'">
       <span>📋</span> Xem lịch sử điểm danh
     </button>
 
-    <div class="info-strip">
-      <div class="chip">🤖 AI face-api.js</div>
-      <div class="chip">🔒 Chạy offline</div>
-      <div class="chip">📍 Lấy vị trí GPS</div>
+    <div class="chip-row">
+      <div class="chip">🤖 Nhìn thẳng vào camera</div>
+      <div class="chip">🔒 Điểm danh đúng giờ</div>
+      <div class="chip">📍 GPS tự động</div><br>
+      <div class="chip" id="knownCount" style="background:var(--surface2);color:var(--muted);">Đang tải CSDL...</div>
     </div>
 
+    <!-- Live Status Panel -->
+    <div class="live-status-panel">
+      <h4>⚡ Trạng thái thời gian thực</h4>
+      <div id="liveStatus">
+        <div class="ls-row muted">Đang chờ model AI tải xong...</div>
+      </div>
+    </div>
+
+    <!-- Result Box -->
     <div class="result-box" id="resultBox">
       <div class="result-icon" id="resultIcon"></div>
       <div class="result-name" id="resultName"></div>
@@ -363,31 +328,50 @@
 
   <!-- HOW IT WORKS -->
   <div class="how-section">
-    <h3>Quy trình nhận diện</h3>
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;">Quy trình nhận diện</h3>
     <div class="steps">
       <div class="step">
         <div class="step-num">1</div>
-        <p>Model AI tải về, chạy hoàn toàn trên trình duyệt</p>
+        <p>Model AI điểm danh và chạy hoàn toàn trên trình duyệt </p>
       </div>
       <div class="step">
         <div class="step-num">2</div>
-        <p>Camera phát hiện & phân tích 128 điểm khuôn mặt</p>
+        <p>Camera phát hiện khuôn mặt, đánh giá cảm xúc</p>
       </div>
       <div class="step">
         <div class="step-num">3</div>
-        <p>So sánh với ảnh sinh viên trong Google Sheet</p>
+        <p>So sánh với CSDL Sinh Viên — tính độ khớp chính xác</p>
       </div>
       <div class="step">
         <div class="step-num">4</div>
-        <p>Ghi nhận điểm danh kèm thời gian & vị trí GPS</p>
+        <p>Ghi vào trang Quản lý để kiểm soát</p>
       </div>
     </div>
   </div>
 
 </div>
 
-<audio id="scanSound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
+<audio id="scanSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
 
 <script src="face.js"></script>
+<script>
+// Dark mode
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute("data-theme") === "dark";
+  html.setAttribute("data-theme", isDark ? "light" : "dark");
+  document.querySelector(".theme-toggle").textContent = isDark ? "🌙" : "☀️";
+  localStorage.setItem("theme", isDark ? "light" : "dark");
+}
+(function() {
+  const t = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", t);
+  // Đợi DOM render
+  window.addEventListener("DOMContentLoaded", () => {
+    const btn = document.querySelector(".theme-toggle");
+    if (btn) btn.textContent = t === "dark" ? "☀️" : "🌙";
+  });
+})();
+</script>
 </body>
 </html>

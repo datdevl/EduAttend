@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,180 +7,102 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f5f4f0;
-    --surface: #ffffff;
-    --border: #e8e6e0;
-    --text: #1a1a18;
-    --muted: #8a8880;
-    --accent: #2563eb;
-    --accent-light: #eff6ff;
-    --danger: #dc2626;
-    --danger-light: #fef2f2;
-    --success: #16a34a;
-    --success-light: #f0fdf4;
-    --warning: #d97706;
-    --warning-light: #fffbeb;
-    --radius: 16px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+:root{
+  --bg:#f5f4f0;--surface:#fff;--surface2:#f9f8f5;--border:#e8e6e0;
+  --text:#1a1a18;--muted:#8a8880;--accent:#2563eb;--accent-light:#eff6ff;
+  --danger:#dc2626;--danger-light:#fef2f2;--success:#16a34a;--success-light:#f0fdf4;
+  --warning:#d97706;--warning-light:#fffbeb;--radius:16px;
+  --shadow:0 1px 3px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.04);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.12);--transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+[data-theme="dark"]{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3350;
+  --text:#e8e8f0;--muted:#6b7090;--accent:#4f8ef7;--accent-light:#1a2540;
+  --danger:#f87171;--danger-light:#2a1515;--success:#4ade80;--success-light:#0f2a1a;
+  --warning:#fbbf24;--warning-light:#2a2010;
+  --shadow:0 1px 3px rgba(0,0,0,0.3),0 4px 16px rgba(0,0,0,0.25);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.4);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background 0.3s,color 0.3s;}
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow);}
+.nav-logo{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--accent);text-decoration:none;}
+.nav-logo span{color:var(--text);}
+.nav-links{display:flex;gap:6px;align-items:center;}
+.nav-links a{padding:8px 16px;border-radius:8px;text-decoration:none;color:var(--muted);font-size:14px;font-weight:500;transition:var(--transition);}
+.nav-links a:hover{background:var(--surface2);color:var(--text);}
+.nav-links a.active{background:var(--accent-light);color:var(--accent);}
+.theme-toggle{width:40px;height:40px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:var(--transition);}
+.theme-toggle:hover{border-color:var(--accent);}
 
-  nav {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 40px; height: 64px;
-    display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 100;
-  }
-  .nav-logo { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; color: var(--accent); }
-  .nav-logo span { color: var(--text); }
-  .nav-links { display: flex; gap: 8px; align-items: center; }
-  .nav-links a {
-    padding: 8px 16px; border-radius: 8px; text-decoration: none;
-    color: var(--muted); font-size: 14px; font-weight: 500; transition: all 0.2s;
-  }
-  .nav-links a:hover { background: var(--bg); color: var(--text); }
-  .nav-links a.active { background: var(--accent-light); color: var(--accent); }
-  #clock {
-    font-family: 'Space Mono', monospace;
-    font-size: 14px;
-    color: var(--muted);
-    padding: 6px 14px;
-    background: var(--bg);
-    border-radius: 8px;
-  }
+#clock{font-family:'Space Mono',monospace;font-size:13px;color:var(--muted);padding:6px 12px;background:var(--surface2);border-radius:8px;}
 
-  .container { max-width: 1100px; margin: 0 auto; padding: 40px; }
+.container{max-width:1100px;margin:0 auto;padding:40px;}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:14px;}
+.page-header h1{font-size:26px;font-weight:600;letter-spacing:-0.5px;}
+.page-header p{font-size:14px;color:var(--muted);margin-top:3px;}
+.refresh-btn{padding:10px 18px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;transition:var(--transition);font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;}
+.refresh-btn:hover{border-color:var(--accent);color:var(--accent);}
 
-  /* HEADER */
-  .page-header {
-    display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px;
-  }
-  .page-header h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.5px; }
-  .page-header p { font-size: 14px; color: var(--muted); margin-top: 4px; }
-  .refresh-btn {
-    display: flex; align-items: center; gap: 6px;
-    padding: 10px 18px;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    background: var(--surface);
-    color: var(--text);
-    font-size: 14px; font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: 'DM Sans', sans-serif;
-  }
-  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;box-shadow:var(--shadow);}
+.stat-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;}
+.stat-val{font-size:28px;font-weight:700;letter-spacing:-1px;font-family:'Space Mono',monospace;}
+.red{color:var(--danger);}.orange{color:var(--warning);}.blue{color:var(--accent);}
 
-  /* STATS ROW */
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    box-shadow: var(--shadow);
-  }
-  .stat-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; }
-  .stat-value { font-size: 32px; font-weight: 600; letter-spacing: -1px; font-family: 'Space Mono', monospace; }
-  .stat-value.danger { color: var(--danger); }
-  .stat-value.warning { color: var(--warning); }
-  .stat-value.success { color: var(--success); }
+/* Urgent */
+.urgent-box{background:var(--danger-light);border:1.5px solid #fca5a5;border-radius:var(--radius);padding:20px;margin-bottom:22px;}
+[data-theme="dark"] .urgent-box{border-color:#7f1d1d;}
+.urgent-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.urgent-hdr h2{font-size:14px;font-weight:700;color:var(--danger);}
+.urgent-badge{background:var(--danger);color:#fff;font-size:11px;font-weight:700;padding:2px 9px;border-radius:100px;}
+.blink{animation:blink 1.2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
 
-  /* URGENT */
-  .urgent-section {
-    background: var(--danger-light);
-    border: 1.5px solid #fecaca;
-    border-radius: var(--radius);
-    padding: 24px;
-    margin-bottom: 24px;
-  }
-  .urgent-header {
-    display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
-  }
-  .urgent-header h2 { font-size: 15px; font-weight: 600; color: var(--danger); }
-  .urgent-badge {
-    background: var(--danger); color: white;
-    font-size: 11px; font-weight: 700;
-    padding: 2px 8px; border-radius: 100px;
-  }
-  .blink { animation: blink 1.2s infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+/* Task */
+.section-hdr{font-size:15px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.count-badge{background:var(--surface2);color:var(--muted);font-size:12px;padding:2px 9px;border-radius:100px;font-family:'Space Mono',monospace;}
 
-  /* TASK CARDS */
-  .task-grid { display: flex; flex-direction: column; gap: 10px; }
-  .task-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 18px 22px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: 16px;
-    transition: box-shadow 0.2s;
-  }
-  .task-item:hover { box-shadow: var(--shadow); }
-  .task-item.urgent { border-color: #fecaca; background: #fff5f5; }
-  .task-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-  .task-meta { font-size: 12px; color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; }
-  .task-meta span { display: flex; align-items: center; gap: 4px; }
-  .countdown {
-    font-family: 'Space Mono', monospace;
-    font-size: 14px;
-    font-weight: 700;
-    padding: 8px 14px;
-    border-radius: 8px;
-    background: var(--bg);
-    color: var(--text);
-    white-space: nowrap;
-    min-width: 140px;
-    text-align: center;
-  }
-  .countdown.danger { background: var(--danger-light); color: var(--danger); }
-  .countdown.warning { background: var(--warning-light); color: var(--warning); }
-  .countdown.expired { background: #f1f5f9; color: var(--muted); }
+.task-list{display:flex;flex-direction:column;gap:10px;}
+.task-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 22px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;transition:var(--transition);}
+.task-item:hover{box-shadow:var(--shadow);}
+.task-item.urgent{border-color:#fca5a5;background:var(--danger-light);}
+[data-theme="dark"] .task-item.urgent{border-color:#7f1d1d;}
+.task-name{font-size:15px;font-weight:600;margin-bottom:5px;}
+.task-meta{font-size:12px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;}
+.countdown{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;padding:8px 14px;border-radius:9px;background:var(--surface2);white-space:nowrap;min-width:130px;text-align:center;border:1px solid var(--border);}
+.countdown.danger{background:var(--danger-light);color:var(--danger);border-color:#fca5a5;}
+.countdown.warning{background:var(--warning-light);color:var(--warning);border-color:#fcd34d;}
+.countdown.expired{background:var(--surface2);color:var(--muted);}
+.task-right{display:flex;align-items:center;gap:8px;}
+.btn-del{
+  padding:8px 10px;border-radius:8px;border:1.5px solid #fca5a5;background:var(--danger-light);
+  color:var(--danger);font-size:12px;font-weight:700;cursor:pointer;transition:var(--transition);
+}
+.btn-del:hover{background:var(--danger);color:#fff;border-color:var(--danger);}
 
-  /* SECTION */
-  .section-title {
-    font-size: 16px; font-weight: 600;
-    margin-bottom: 16px;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .section-title .count {
-    background: var(--bg); color: var(--muted);
-    font-size: 12px; padding: 2px 8px; border-radius: 100px;
-    font-family: 'Space Mono', monospace;
-  }
+.empty-state{text-align:center;padding:50px;color:var(--muted);}
+.empty-state .ico{font-size:40px;margin-bottom:10px;}
 
-  .empty-state {
-    text-align: center;
-    padding: 40px;
-    color: var(--muted);
-    font-size: 14px;
-  }
-  .empty-state .icon { font-size: 36px; margin-bottom: 10px; }
-
-  @media (max-width: 768px) {
-    nav { padding: 0 20px; }
-    .container { padding: 24px 20px; }
-    .stats { grid-template-columns: repeat(2, 1fr); }
-    .task-item { grid-template-columns: 1fr; }
-  }
+@media(max-width:768px){
+  nav{padding:0 20px;}.container{padding:20px;}
+  .stats{grid-template-columns:repeat(2,1fr);}
+  .task-item{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
 
 <nav>
-  <div class="nav-logo">Edu<span>Attend</span></div>
+  <a href="index.html" class="nav-logo">Edu<span>Attend</span></a>
   <div class="nav-links">
     <a href="index.html">Trang chủ</a>
     <a href="faceID.html">Điểm danh</a>
     <a href="dashboard.html" class="active">Dashboard</a>
     <a href="manage.html">Quản lý</a>
     <div id="clock">--:--:--</div>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
   </div>
 </nav>
 
@@ -190,54 +112,194 @@
       <h1>Dashboard nhiệm vụ</h1>
       <p>Theo dõi deadline và tiến độ công việc theo thời gian thực</p>
     </div>
-    <button class="refresh-btn" onclick="loadTasks()">
-      <span>🔄</span> Làm mới
-    </button>
+    <button class="refresh-btn" onclick="loadTasks()">🔄 Làm mới</button>
   </div>
 
-  <!-- STATS -->
   <div class="stats">
-    <div class="stat-card">
-      <div class="stat-label">Tổng nhiệm vụ</div>
-      <div class="stat-value" id="statTotal">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Sắp hết hạn</div>
-      <div class="stat-value danger" id="statUrgent">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Trong 24h</div>
-      <div class="stat-value warning" id="statToday">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Đã hết hạn</div>
-      <div class="stat-value" id="statExpired">—</div>
-    </div>
+    <div class="stat"><div class="stat-label">Tổng nhiệm vụ</div><div class="stat-val blue" id="sTotal">—</div></div>
+    <div class="stat"><div class="stat-label">Sắp hết hạn</div><div class="stat-val red" id="sUrgent">—</div></div>
+    <div class="stat"><div class="stat-label">Trong 24h</div><div class="stat-val orange" id="sToday">—</div></div>
+    <div class="stat"><div class="stat-label">Đã hết hạn</div><div class="stat-val" style="color:var(--muted)" id="sExpired">—</div></div>
   </div>
 
-  <!-- URGENT -->
-  <div class="urgent-section" id="urgentSection" style="display:none">
-    <div class="urgent-header">
+  <div class="urgent-box" id="urgentSection" style="display:none">
+    <div class="urgent-hdr">
       <span class="blink">🔴</span>
       <h2>DEADLINE SẮP TỚI</h2>
       <span class="urgent-badge" id="urgentCount">0</span>
     </div>
-    <div class="task-grid" id="urgentList"></div>
+    <div class="task-list" id="urgentList"></div>
   </div>
 
-  <!-- ALL TASKS -->
-  <div class="section-title">
-    Tất cả nhiệm vụ
-    <span class="count" id="totalCount">0</span>
-  </div>
-  <div class="task-grid" id="taskList">
-    <div class="empty-state">
-      <div class="icon">📋</div>
-      <div>Đang tải dữ liệu...</div>
-    </div>
+  <div class="section-hdr">Tất cả nhiệm vụ <span class="count-badge" id="totalCount">0</span></div>
+  <div class="task-list" id="taskList">
+    <div class="empty-state"><div class="ico">📋</div><div>Đang tải...</div></div>
   </div>
 </div>
 
-<script src="dashboard.js"></script>
+<script>
+const DASH_API = "https://script.google.com/macros/s/AKfycbzEhVFMu3C3b0jfpkDw4-yHIRGnAB4AgopNRCl0c1VdXyH5k4PBcqnXMPPVCeiWnX5x/exec";
+const DASH_TASK_API = DASH_API + "?task=1";
+let cdList = [];
+let deletingRows = new Set();
+
+function parseTaskRow(row) {
+  // Hỗ trợ cả schema cũ [task, created, deadline] và schema mới [stt, task, created, deadline]
+  const first = (row?.[0] || "").toString().trim();
+  const isNewSchema = /^\d+$/.test(first) || /^stt$/i.test(first);
+  if (isNewSchema) {
+    return {
+      stt: row?.[0] ?? "",
+      task: row?.[1] ?? "Không tiêu đề",
+      created: row?.[2] ?? "",
+      deadlineRaw: row?.[3] ?? ""
+    };
+  }
+  return {
+    stt: "",
+    task: row?.[0] ?? "Không tiêu đề",
+    created: row?.[1] ?? "",
+    deadlineRaw: row?.[2] ?? ""
+  };
+}
+
+setInterval(() => {
+  document.getElementById("clock").textContent = new Date().toLocaleTimeString("vi-VN",{hour12:false});
+}, 1000);
+
+function fmtCD(ms) {
+  if (ms <= 0) return "Đã hết hạn";
+  const h = Math.floor(ms/3600000), m = Math.floor((ms%3600000)/60000), s = Math.floor((ms%60000)/1000);
+  if (h > 48) return Math.floor(h/24) + "d " + (h%24) + "h";
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function cdClass(ms) {
+  if (ms <= 0) return "expired";
+  if (ms < 3600000) return "danger";
+  if (ms < 86400000) return "warning";
+  return "";
+}
+
+async function loadTasks() {
+  try {
+    const res  = await fetch(DASH_TASK_API);
+    const data = await res.json();
+    const rows = data.slice(1)
+      .map((row, i) => ({ row, sheetRow: i + 2 }))
+      .reverse();
+    const now  = new Date();
+    const ul = document.getElementById("urgentList");
+    const tl = document.getElementById("taskList");
+    ul.innerHTML = ""; tl.innerHTML = "";
+    cdList = [];
+    let urgent=0, expired=0, today=0;
+
+    if (!rows.length) {
+      tl.innerHTML = `<div class="empty-state"><div class="ico">📭</div><div>Chưa có nhiệm vụ</div></div>`;
+    }
+
+    rows.forEach((item, i) => {
+      const row = item.row;
+      const sheetRow = item.sheetRow;
+      const parsed   = parseTaskRow(row);
+      const task     = parsed.task || "Không tiêu đề";
+      const created  = parsed.created || "";
+      const deadline = new Date(parsed.deadlineRaw);
+      const valid    = !isNaN(deadline);
+      const diff     = valid ? deadline - now : Infinity;
+      const id       = "cd_" + i;
+      const isUrgent = valid && diff > 0 && diff < 3*86400000;
+      const isExpired= valid && diff <= 0;
+      const isToday  = valid && diff > 0 && diff < 86400000;
+
+      if (isUrgent) urgent++;
+      if (isExpired) expired++;
+      if (isToday) today++;
+      cdList.push({ id, deadline, valid });
+
+      const html = `
+        <div class="task-item${isUrgent?' urgent':''}">
+          <div>
+            <div class="task-name">${task}</div>
+            <div class="task-meta">
+              <span>📅 Giao: ${created}</span>
+              <span>⏰ Deadline: ${valid ? deadline.toLocaleString("vi-VN") : "Không có"}</span>
+            </div>
+          </div>
+          <div class="task-right">
+            <div class="countdown ${valid ? cdClass(diff) : 'expired'}" id="${id}">
+              ${valid ? fmtCD(diff) : "—"}
+            </div>
+            <button class="btn-del" onclick="deleteTask(${sheetRow}, '${String(task).replace(/'/g, "\\'")}')"
+              ${deletingRows.has(sheetRow) ? "disabled" : ""}>
+              🗑 Xóa
+            </button>
+          </div>
+        </div>`;
+
+      if (isUrgent) ul.innerHTML += html;
+      tl.innerHTML += html;
+    });
+
+    document.getElementById("sTotal").textContent   = rows.length;
+    document.getElementById("sUrgent").textContent  = urgent;
+    document.getElementById("sToday").textContent   = today;
+    document.getElementById("sExpired").textContent = expired;
+    document.getElementById("totalCount").textContent = rows.length;
+    document.getElementById("urgentCount").textContent = urgent;
+    document.getElementById("urgentSection").style.display = urgent > 0 ? "block" : "none";
+  } catch(err) {
+    document.getElementById("taskList").innerHTML =
+      `<div class="empty-state"><div class="ico">❌</div><div>Lỗi: ${err.message}</div></div>`;
+  }
+}
+
+async function deleteTask(row, taskName) {
+  const ok = confirm(`Xóa nhiệm vụ "${taskName}"?`);
+  if (!ok) return;
+  deletingRows.add(row);
+  try {
+    // Tương thích kiểu update ở manage.js
+    const url = `${DASH_API}?task=1&delete=true&row=${row}`;
+    const res = await fetch(url, { method: "POST" });
+    const data = await res.json().catch(() => ({}));
+    if (data && data.success === false) throw new Error(data.error || "Xóa thất bại");
+    await loadTasks();
+  } catch (err) {
+    alert("❌ Không xóa được nhiệm vụ: " + err.message + "\nBạn cần thêm nhánh delete trong Apps Script.");
+  } finally {
+    deletingRows.delete(row);
+  }
+}
+
+setInterval(() => {
+  const now = new Date();
+  cdList.forEach(item => {
+    const el = document.getElementById(item.id);
+    if (!el || !item.valid) return;1
+    const diff = item.deadline - now;
+    el.textContent = fmtCD(diff);
+    el.className = "countdown " + cdClass(diff);
+  });
+}, 1000);
+
+loadTasks();
+setInterval(loadTasks, 30000);
+
+function toggleTheme(){
+  const html=document.documentElement,isDark=html.getAttribute("data-theme")==="dark";
+  html.setAttribute("data-theme",isDark?"light":"dark");
+  document.querySelector(".theme-toggle").textContent=isDark?"🌙":"☀️";
+  localStorage.setItem("theme",isDark?"light":"dark");
+}
+(function(){
+  const t=localStorage.getItem("theme")||"light";
+  document.documentElement.setAttribute("data-theme",t);
+  window.addEventListener("DOMContentLoaded",()=>{
+    const btn=document.querySelector(".theme-toggle");
+    if(btn)btn.textContent=t==="dark"?"☀️":"🌙";
+  });
+})();
+</script>
 </body>
 </html>

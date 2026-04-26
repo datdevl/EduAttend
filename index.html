@@ -1,363 +1,198 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EduAttend — Hệ Thống Điểm Danh</title>
+<title>EduAttend — Hệ Thống Điểm Danh DNU</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f5f4f0;
-    --surface: #ffffff;
-    --border: #e8e6e0;
-    --text: #1a1a18;
-    --muted: #8a8880;
-    --accent: #2563eb;
-    --accent-light: #eff6ff;
-    --danger: #dc2626;
-    --success: #16a34a;
-    --warning: #d97706;
-    --radius: 16px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
-  }
+:root {
+  --bg:#f5f4f0; --surface:#ffffff; --surface2:#f9f8f5; --border:#e8e6e0;
+  --text:#1a1a18; --muted:#8a8880; --accent:#2563eb; --accent-light:#eff6ff;
+  --danger:#dc2626; --success:#16a34a; --radius:16px;
+  --shadow:0 1px 3px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.04);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.12);
+  --transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+[data-theme="dark"] {
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+  --text:#e8e8f0; --muted:#6b7090; --accent:#4f8ef7; --accent-light:#1a2540;
+  --danger:#f87171; --success:#4ade80;
+  --shadow:0 1px 3px rgba(0,0,0,0.3),0 4px 16px rgba(0,0,0,0.25);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.4);
+}
+*{ margin:0; padding:0; box-sizing:border-box; }
+body{ font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition:background 0.3s,color 0.3s; }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+nav {
+  background:var(--surface); border-bottom:1px solid var(--border);
+  padding:0 40px; height:64px; display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:100; box-shadow:var(--shadow);
+}
+.nav-logo { font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--accent); text-decoration:none; }
+.nav-logo span { color:var(--text); }
+.nav-links { display:flex; gap:6px; align-items:center; }
+.nav-links a { padding:8px 16px; border-radius:8px; text-decoration:none; color:var(--muted); font-size:14px; font-weight:500; transition:var(--transition); }
+.nav-links a:hover { background:var(--surface2); color:var(--text); }
+.nav-links a.active { background:var(--accent-light); color:var(--accent); }
+.theme-toggle { width:40px; height:40px; border-radius:10px; border:1.5px solid var(--border); background:var(--surface2); cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; transition:var(--transition); color:var(--text); }
+.theme-toggle:hover { border-color:var(--accent); }
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-  }
+/* HERO */
+.hero { max-width:900px; margin:0 auto; padding:80px 40px 48px; }
+.badge {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--accent-light); color:var(--accent);
+  font-size:11px; font-weight:700; padding:6px 14px;
+  border-radius:100px; margin-bottom:24px; letter-spacing:0.5px; text-transform:uppercase;
+}
+.badge::before { content:''; width:6px; height:6px; background:var(--accent); border-radius:50%; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+h1 { font-size:clamp(32px,5vw,52px); font-weight:600; line-height:1.1; letter-spacing:-1.5px; margin-bottom:18px; }
+h1 em { color:var(--accent); font-style:normal; }
+.hero p { font-size:17px; color:var(--muted); line-height:1.7; max-width:520px; margin-bottom:40px; }
 
-  /* NAV */
-  nav {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 40px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .nav-logo {
-    font-family: 'Space Mono', monospace;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: -0.5px;
-  }
-  .nav-logo span { color: var(--text); }
-  .nav-links { display: flex; gap: 8px; }
-  .nav-links a {
-    padding: 8px 16px;
-    border-radius: 8px;
-    text-decoration: none;
-    color: var(--muted);
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s;
-  }
-  .nav-links a:hover { background: var(--bg); color: var(--text); }
-  .nav-links a.active { background: var(--accent-light); color: var(--accent); }
+/* CARDS */
+.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; max-width:900px; margin:0 auto; padding:0 40px 48px; }
+.card-link {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:24px; text-decoration:none; color:var(--text);
+  transition:var(--transition); display:block; box-shadow:var(--shadow);
+  position:relative; overflow:hidden;
+}
+.card-link::after { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--accent),#7c3aed); transform:scaleX(0); transition:transform 0.25s; transform-origin:left; }
+.card-link:hover { transform:translateY(-3px); box-shadow:var(--shadow-lg); }
+.card-link:hover::after { transform:scaleX(1); }
+.card-ico { width:46px; height:46px; background:var(--accent-light); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; margin-bottom:16px; }
+.card-link h3 { font-size:16px; font-weight:600; margin-bottom:6px; }
+.card-link p { font-size:13px; color:var(--muted); line-height:1.6; }
+.card-arrow { display:inline-flex; align-items:center; gap:4px; margin-top:16px; font-size:13px; font-weight:600; color:var(--accent); }
 
-  /* HERO */
-  .hero {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 80px 40px 60px;
-  }
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--accent-light);
-    color: var(--accent);
-    font-size: 12px;
-    font-weight: 600;
-    padding: 6px 14px;
-    border-radius: 100px;
-    margin-bottom: 24px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
-  .badge::before {
-    content: '';
-    width: 6px; height: 6px;
-    background: var(--accent);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-  h1 {
-    font-size: clamp(36px, 5vw, 56px);
-    font-weight: 600;
-    line-height: 1.1;
-    letter-spacing: -1.5px;
-    margin-bottom: 20px;
-    color: var(--text);
-  }
-  h1 em { color: var(--accent); font-style: normal; }
-  .hero p {
-    font-size: 18px;
-    color: var(--muted);
-    line-height: 1.7;
-    max-width: 560px;
-    margin-bottom: 48px;
-    font-weight: 300;
-  }
+/* TASK SECTION */
+.section { max-width:900px; margin:0 auto; padding:0 40px 80px; }
+.section-title { font-size:22px; font-weight:600; letter-spacing:-0.5px; margin-bottom:20px; }
 
-  /* CARDS GRID */
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 0 40px 80px;
-  }
+.form-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:32px; box-shadow:var(--shadow); }
+.form-group { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+label { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+input { padding:12px 16px; border:1.5px solid var(--border); border-radius:10px; font-family:'DM Sans',sans-serif; font-size:15px; color:var(--text); background:var(--surface2); transition:var(--transition); outline:none; width:100%; }
+input:focus { border-color:var(--accent); background:var(--surface); box-shadow:0 0 0 3px rgba(37,99,235,0.1); }
+input[type="datetime-local"] { color-scheme:light dark; }
 
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px;
-    text-decoration: none;
-    color: var(--text);
-    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-    display: block;
-    box-shadow: var(--shadow);
-    position: relative;
-    overflow: hidden;
-  }
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--accent);
-    transform: scaleX(0);
-    transition: transform 0.25s;
-    transform-origin: left;
-  }
-  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: transparent; }
-  .card:hover::before { transform: scaleX(1); }
+.btn-submit {
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  background:linear-gradient(135deg,#2563eb,#7c3aed);
+  color:#fff; border:none; padding:14px 28px;
+  border-radius:12px; font-family:'DM Sans',sans-serif;
+  font-size:15px; font-weight:700; cursor:pointer;
+  transition:var(--transition); width:100%;
+  box-shadow:0 4px 14px rgba(37,99,235,0.35);
+  letter-spacing:0.3px;
+}
+.btn-submit:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(37,99,235,0.45); }
+.btn-submit:active { transform:translateY(0); }
+.btn-submit:disabled { opacity:0.65; pointer-events:none; }
+@keyframes spin { to{transform:rotate(360deg)} }
+.spin-icon { animation:spin 0.8s linear infinite; display:inline-block; }
 
-  .card-icon {
-    width: 48px; height: 48px;
-    background: var(--accent-light);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    margin-bottom: 20px;
-  }
-  .card h3 {
-    font-size: 17px;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-  .card p {
-    font-size: 14px;
-    color: var(--muted);
-    line-height: 1.6;
-  }
-  .card-arrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 20px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--accent);
-  }
+/* CANVAS WRAP */
+#canvasWrap {
+  display:none; margin-top:24px;
+  border:1px solid var(--border); border-radius:var(--radius);
+  overflow:hidden; box-shadow:var(--shadow-lg);
+  animation:fadeUp 0.5s ease;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+#biaCanvas { width:100%; display:block; }
 
-  /* TASK SECTION */
-  .section {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 0 40px 80px;
-  }
-  .section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-  }
-  .section-title {
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: -0.5px;
-  }
+/* Download button */
+.dl-btn {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  padding:11px 20px; margin-top:12px;
+  border:1.5px solid var(--border); border-radius:10px;
+  background:var(--surface2); color:var(--text);
+  font-size:14px; font-weight:600; cursor:pointer;
+  transition:var(--transition); text-decoration:none;
+  font-family:'DM Sans',sans-serif;
+}
+.dl-btn:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-light); }
 
-  .form-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 32px;
-    box-shadow: var(--shadow);
-  }
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-  .form-group { display: flex; flex-direction: column; gap: 8px; }
-  label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--muted);
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-  }
-  input {
-    padding: 12px 16px;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    color: var(--text);
-    background: var(--bg);
-    transition: all 0.2s;
-    outline: none;
-    width: 100%;
-  }
-  input:focus {
-    border-color: var(--accent);
-    background: var(--surface);
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
-  }
-  .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 13px 28px;
-    border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    width: 100%;
-    justify-content: center;
-  }
-  .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
-  .btn-primary:active { transform: translateY(0); }
-  .btn-primary.loading { opacity: 0.7; pointer-events: none; }
+#toast {
+  position:fixed; bottom:32px; right:32px;
+  padding:14px 22px; border-radius:12px; font-size:14px; font-weight:600;
+  transform:translateY(80px); opacity:0; transition:all 0.35s cubic-bezier(0.4,0,0.2,1);
+  z-index:9999; box-shadow:var(--shadow-lg); color:#fff;
+  font-family:'DM Sans',sans-serif; max-width:320px;
+}
 
-  /* TOAST */
-  #toast {
-    position: fixed;
-    bottom: 32px; right: 32px;
-    background: var(--text);
-    color: white;
-    padding: 14px 22px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 500;
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-    z-index: 999;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: var(--shadow-lg);
-  }
-  #toast.show { transform: translateY(0); opacity: 1; }
-  #toast.success { background: var(--success); }
-  #toast.error { background: var(--danger); }
-
-  /* OUTPUT CANVAS */
-  #canvasWrap {
-    margin-top: 20px;
-    display: none;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-  #biaCanvas { width: 100%; display: block; }
-
-  @media (max-width: 640px) {
-    nav { padding: 0 20px; }
-    .hero, .cards, .section { padding-left: 20px; padding-right: 20px; }
-    .form-row { grid-template-columns: 1fr; }
-    h1 { font-size: 32px; }
-  }
+@media(max-width:640px){
+  nav { padding:0 20px; }
+  .hero,.cards,.section { padding-left:20px; padding-right:20px; }
+  h1 { font-size:28px; }
+}
 </style>
 </head>
 <body>
 
 <nav>
-  <div class="nav-logo">Edu<span>Attend</span></div>
+  <a href="index.html" class="nav-logo">Edu<span>Attend</span></a>
   <div class="nav-links">
     <a href="index.html" class="active">Trang chủ</a>
     <a href="faceID.html">Điểm danh</a>
     <a href="dashboard.html">Dashboard</a>
     <a href="manage.html">Quản lý</a>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Đổi giao diện">🌙</button>
   </div>
 </nav>
 
 <div class="hero">
   <div class="badge">CNTT 19-07 · ĐH Đại Nam</div>
   <h1>Hệ thống điểm danh<br><em>thông minh</em></h1>
-  <p>Nhận diện khuôn mặt bằng AI, theo dõi điểm danh theo thời gian thực, quản lý nhiệm vụ — tất cả trong một nền tảng.</p>
+  <p>Nhận diện khuôn mặt AI, quản lý nhiệm vụ và theo dõi điểm danh theo thời gian thực.</p>
 </div>
 
 <div class="cards">
-  <a class="card" href="faceID.html">
-    <div class="card-icon">🎭</div>
+  <a class="card-link" href="faceID.html">
+    <div class="card-ico">🎭</div>
     <h3>Điểm danh Face ID</h3>
-    <p>Nhận diện khuôn mặt bằng AI, so sánh với cơ sở dữ liệu sinh viên.</p>
+    <p>Nhận diện khuôn mặt AI, so sánh CSDL sinh viên, ghi lên Google Sheet tự động.</p>
     <div class="card-arrow">Quét ngay →</div>
   </a>
-  <a class="card" href="dashboard.html">
-    <div class="card-icon">📊</div>
+  <a class="card-link" href="dashboard.html">
+    <div class="card-ico">📊</div>
     <h3>Dashboard</h3>
-    <p>Xem tất cả nhiệm vụ, deadline sắp tới và trạng thái theo thời gian thực.</p>
+    <p>Xem tất cả nhiệm vụ, deadline đang đếm ngược và trạng thái theo thời gian thực.</p>
     <div class="card-arrow">Xem dashboard →</div>
   </a>
-  <a class="card" href="manage.html">
-    <div class="card-icon">👥</div>
+  <a class="card-link" href="manage.html">
+    <div class="card-ico">👥</div>
     <h3>Quản lý điểm danh</h3>
-    <p>Xem lịch sử điểm danh, cập nhật trạng thái và xuất báo cáo.</p>
+    <p>Xem lịch sử, cập nhật trạng thái và tìm kiếm theo tên, MSV, vị trí.</p>
     <div class="card-arrow">Quản lý →</div>
   </a>
 </div>
 
 <div class="section">
-  <div class="section-header">
-    <h2 class="section-title">Giao nhiệm vụ</h2>
-  </div>
+  <h2 class="section-title">📝 Giao nhiệm vụ</h2>
   <div class="form-card">
-    <div class="form-row">
-      <div class="form-group" style="grid-column: 1/-1;">
-        <label>Nội dung nhiệm vụ</label>
-        <input type="text" id="taskInput" placeholder="Nhập nhiệm vụ cần giao...">
-      </div>
+    <div class="form-group">
+      <label>Nội dung nhiệm vụ</label>
+      <input type="text" id="taskInput" placeholder="Nhập nội dung nhiệm vụ cần giao...">
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Deadline</label>
-        <input type="datetime-local" id="deadlineInput">
-      </div>
+    <div class="form-group">
+      <label>Deadline</label>
+      <input type="datetime-local" id="deadlineInput">
     </div>
-    <button class="btn-primary" id="submitBtn" onclick="addTask()">
+
+    <button class="btn-submit" id="submitBtn" onclick="addTask()">
       <span>🚀</span> Giao nhiệm vụ
     </button>
+
+    <!-- Canvas bìa hiện ra sau khi submit -->
     <div id="canvasWrap">
       <canvas id="biaCanvas"></canvas>
+      <button class="dl-btn" onclick="downloadCanvas()">⬇️ Tải ảnh nhiệm vụ</button>
     </div>
   </div>
 </div>
@@ -365,5 +200,29 @@
 <div id="toast"></div>
 
 <script src="app.js"></script>
+<script>
+function downloadCanvas() {
+  const c = document.getElementById("biaCanvas");
+  const a = document.createElement("a");
+  a.download = "nhiem-vu-" + Date.now() + ".jpg";
+  a.href = c.toDataURL("image/jpeg", 0.92);
+  a.click();
+}
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute("data-theme") === "dark";
+  html.setAttribute("data-theme", isDark ? "light" : "dark");
+  document.querySelector(".theme-toggle").textContent = isDark ? "🌙" : "☀️";
+  localStorage.setItem("theme", isDark ? "light" : "dark");
+}
+(function() {
+  const t = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", t);
+  window.addEventListener("DOMContentLoaded", () => {
+    const btn = document.querySelector(".theme-toggle");
+    if (btn) btn.textContent = t === "dark" ? "☀️" : "🌙";
+  });
+})();
+</script>
 </body>
 </html>
